@@ -12,7 +12,6 @@ import {
 import { ButtonOption } from "./types/ButtonOption";
 
 const availableEmojis = ["⏮️", "◀️", "⏹️", "▶️", "⏭️"];
-
 class Pagination {
   private message?: Message;
   private readonly channel: TextChannel | DMChannel;
@@ -65,11 +64,6 @@ class Pagination {
     private readonly Author?: UserResolvable,
     private readonly files?: AttachmentBuilder[]
   ) {
-    if (options && options.length > 5) {
-      throw new TypeError("You have passed more than 5 buttons as options");
-    } else if (options && options.length < 4) {
-      throw new TypeError("You have passed less than 5 buttons as options");
-    }
     this.channel = channel;
     if (files) {
       this.files = files;
@@ -99,7 +93,6 @@ class Pagination {
         new ActionRowBuilder<ButtonBuilder>({
           components: options.map((x, i) => {
             return new ButtonBuilder({
-              emoji: x.emoji,
               style: x.style,
               type: 2,
               label: x.label,
@@ -117,7 +110,7 @@ class Pagination {
       : undefined;
     const interactionCollector = this.message?.createMessageComponentCollector({
       max: this.pages.length * 5,
-      filter: (x) => {
+      filter: (x: any) => {
         return !(author && x.user.id !== author.id);
       },
     });
@@ -130,7 +123,7 @@ class Pagination {
       },
       this.timeout ? this.timeout : 60000
     );
-    interactionCollector?.on("collect", async (interaction) => {
+    interactionCollector?.on("collect", async (interaction: any) => {
       const { customId } = interaction;
       let newIndex =
         customId === availableEmojis[0]

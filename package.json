@@ -1,5 +1,5 @@
 {
-  "name": "discordjs-button-embed-pagination",
+  "name": "@lanred/discordjs-button-embed-pagination",
   "version": "5.0.0",
   "description": "Discord.js V14 embed pagination with button",
   "main": "dist/index.js",
