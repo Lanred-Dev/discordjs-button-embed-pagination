@@ -3,18 +3,17 @@ import {
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
-  DMChannel,
   EmbedBuilder,
-  Message,
-  TextChannel,
+  CommandInteraction,
   UserResolvable,
+  MessageComponentInteraction,
 } from "discord.js";
 import { ButtonOption } from "./types/ButtonOption";
 
 const availableEmojis = ["⏮️", "◀️", "⏹️", "▶️", "⏭️"];
 class Pagination {
-  private message?: Message;
-  private readonly channel: TextChannel | DMChannel;
+  private message?: any;
+  private readonly interaction: CommandInteraction;
   private readonly pages: EmbedBuilder[];
   private index = 0;
   private readonly defaultOptions: ButtonOption[] = [
@@ -56,7 +55,7 @@ class Pagination {
    * @param {AttachmentBuilder[]} files - Optional files to attach
    */
   constructor(
-    channel: TextChannel | DMChannel,
+    interaction: CommandInteraction,
     pages: EmbedBuilder[],
     private readonly footerText = "Page",
     private readonly timeout?: number,
@@ -64,7 +63,7 @@ class Pagination {
     private readonly Author?: UserResolvable,
     private readonly files?: AttachmentBuilder[]
   ) {
-    this.channel = channel;
+    this.interaction = interaction;
     if (files) {
       this.files = files;
     }
@@ -86,7 +85,7 @@ class Pagination {
    */
   async paginate(): Promise<void> {
     const options = this.options || this.defaultOptions;
-    this.message = await this.channel.send({
+    this.message = await this.interaction.reply({
       embeds: [this.pages[this.index]],
       ...(this.files && { files: [this.files[this.index]] }),
       components: [
@@ -106,9 +105,9 @@ class Pagination {
       return;
     }
     const author = this.Author
-      ? this.channel.client.users.resolve(this.Author)
+      ? this.interaction.client.users.resolve(this.Author)
       : undefined;
-    const interactionCollector = this.message?.createMessageComponentCollector({
+    const interactionCollector = this.message.createMessageComponentCollector({
       max: this.pages.length * 5,
       filter: (x: any) => {
         return !(author && x.user.id !== author.id);
@@ -117,7 +116,7 @@ class Pagination {
     setTimeout(
       async () => {
         interactionCollector?.stop("Timeout");
-        await this?.message?.edit({
+        await this?.interaction?.editReply({
           components: [],
         });
       },
@@ -154,7 +153,7 @@ class Pagination {
       }
     });
     interactionCollector?.on("end", async () => {
-      await this?.message?.edit({
+      await this?.interaction.editReply({
         components: [],
       });
     });
